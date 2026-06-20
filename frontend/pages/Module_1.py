@@ -1,8 +1,11 @@
 import streamlit as st
 from ziko_st_toc import table_of_contents
+from ui_style import apply_style
 
 
-st.title('Table Of contents :')
+apply_style('Module 1 - Models, Prompts, and Chains')
+
+st.title('Module 1 - Models, Prompts, and Chains')
 
 with st.sidebar:
    table_of_contents()
