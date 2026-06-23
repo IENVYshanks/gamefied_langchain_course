@@ -1,0 +1,14 @@
+fastapi
+pydantic
+uvicorn
+streamlit
+langchain
+langchain-core
+langchain-ollama
+langchain-chroma
+langchain-text-splitters
+langchain-openai
+langgraph
+ziko-st-toc
+numpy
+typing-extensions
