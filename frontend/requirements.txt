@@ -9,6 +9,7 @@ langchain-chroma
 langchain-text-splitters
 langchain-openai
 langgraph
+streamlit-authenticator
 ziko-st-toc
 numpy
 typing-extensions
