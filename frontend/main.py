@@ -1,8 +1,64 @@
 import streamlit as st
 from ui_style import apply_style, hero, module_card
+from auth_utils import restore_session, save_config
 
-def main():
-    apply_style("Gamified LangChain Learning")
+
+def render_login_gate(authenticator, config):
+    st.title("Gamified LangChain Learning")
+    st.caption("Log in to unlock the course modules.")
+
+    tab_login, tab_register, tab_forgot_pw, tab_forgot_user = st.tabs(
+        ["Login", "Register", "Forgot password", "Forgot username"]
+    )
+
+    with tab_login:
+        try:
+            authenticator.login()
+        except Exception as e:
+            st.error(e)
+        auth_status = st.session_state.get("authentication_status")
+        if auth_status is False:
+            st.error("Username/password is incorrect")
+        elif auth_status is None:
+            st.info("Enter your username and password to access the course.")
+        elif auth_status is True:
+            st.rerun()
+
+    with tab_register:
+        try:
+            email, username, name = authenticator.register_user(
+                pre_authorized=config["pre-authorized"]["emails"]
+            )
+            if email:
+                save_config(config)
+                st.success("Registered successfully — switch to the Login tab.")
+        except Exception as e:
+            st.error(e)
+
+    with tab_forgot_pw:
+        try:
+            username, email, new_password = authenticator.forgot_password()
+            if username:
+                save_config(config)
+                st.success("New password generated.")
+                st.info(f"New password (demo only): {new_password}")
+            elif username is False:
+                st.error("Username not found")
+        except Exception as e:
+            st.error(e)
+
+    with tab_forgot_user:
+        try:
+            username, email = authenticator.forgot_username()
+            if username:
+                st.success(f"Username recovered (demo only): {username}")
+            elif username is False:
+                st.error("Email not found")
+        except Exception as e:
+            st.error(e)
+
+
+def render_course_home():
     hero(
         "Gamified LangChain Learning",
         "A focused learning app for understanding LangChain, agents, memory, "
@@ -90,7 +146,21 @@ def main():
         "Use the sidebar to open each module. Each page contains summarized "
         "concepts and code examples you can adapt for your own LangChain apps."
     )
-    
+
+
+def main():
+    apply_style("Gamified LangChain Learning")
+    authenticator, config = restore_session()
+
+    if st.session_state.get("authentication_status"):
+        with st.sidebar:
+            st.write(f'Logged in as **{st.session_state.get("name")}**')
+            authenticator.logout("Logout", "sidebar")
+        render_course_home()
+    else:
+        render_login_gate(authenticator, config)
+
+
 if __name__ == "__main__":
     main()
 

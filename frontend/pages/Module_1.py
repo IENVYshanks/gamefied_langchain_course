@@ -1,9 +1,12 @@
 import streamlit as st
 from ziko_st_toc import table_of_contents
 from ui_style import apply_style
+from auth_utils import require_login
 
 
 apply_style('Module 1 - Models, Prompts, and Chains')
+require_login()
+
 
 st.title('Module 1 - Models, Prompts, and Chains')
 

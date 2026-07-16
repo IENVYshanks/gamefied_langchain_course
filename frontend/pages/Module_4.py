@@ -1,9 +1,11 @@
 import streamlit as st
 from ziko_st_toc import table_of_contents
 from ui_style import apply_style
+from auth_utils import require_login
 
 
 apply_style('Module 4 - RAG')
+require_login()
 
 st.title('Module 4 - RAG')
 with st.sidebar:

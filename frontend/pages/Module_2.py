@@ -1,8 +1,12 @@
 import streamlit as st
 from ziko_st_toc import table_of_contents
 from ui_style import apply_style
+from auth_utils import require_login
+
 
 apply_style('Module 2 - Agents and Tools')
+require_login()
+
 
 st.title('Module 2 - Agents and Tools')
 with st.sidebar:
@@ -10,7 +14,10 @@ with st.sidebar:
 
 st.header('Agents')
 st.write('An agent is a model calling tools in a loop until a given task is complete.')
-st.image("frontend/files/core_agent_loop.svg")
+try:
+    st.image("frontend/files/core_agent_loop.svg")
+except Exception as e:
+    print("image not found")
 st.write('A harness is everything around that loop: the model, its prompt, its tools, and any middleware that shapes its behavior.')
 st.write(':blue[create_agent] is a highly configurable harness. At its simplest, you can create one with:')
 st.code(

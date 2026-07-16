@@ -6,9 +6,11 @@ import streamlit as st
 from ziko_st_toc import table_of_contents
 
 from ui_style import apply_style
+from auth_utils import require_login
 
 
-apply_style('Module 6 - Interactive Agent Demo')
+apply_style('Try it - Interactive Agent Demo')
+require_login()
 
 st.title('Module 6 - Interactive Agent Demo')
 with st.sidebar:
