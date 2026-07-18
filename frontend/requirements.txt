@@ -9,7 +9,10 @@ langchain-chroma
 langchain-text-splitters
 langchain-openai
 langgraph
-streamlit-authenticator
+bcrypt
+email-validator
+mysql-connector-python
+sqlalchemy
 ziko-st-toc
 numpy
 typing-extensions

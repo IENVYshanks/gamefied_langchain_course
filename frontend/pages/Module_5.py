@@ -2,6 +2,7 @@ import streamlit as st
 from ziko_st_toc import table_of_contents
 from ui_style import apply_style
 from auth_utils import require_login
+from quiz import render_module_quiz
 
 
 apply_style('Module 5 - Agentic AI')
@@ -521,3 +522,5 @@ st.info(
     'the control surface for deciding what runs, what state is visible, and '
     'how work moves through the system.'
 )
+
+render_module_quiz("module_5")

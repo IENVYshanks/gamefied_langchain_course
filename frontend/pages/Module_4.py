@@ -2,6 +2,7 @@ import streamlit as st
 from ziko_st_toc import table_of_contents
 from ui_style import apply_style
 from auth_utils import require_login
+from quiz import render_module_quiz
 
 
 apply_style('Module 4 - RAG')
@@ -420,3 +421,5 @@ st.info(
     'Key idea: embeddings make meaning searchable, vector stores make search '
     'fast, and retrieval chains connect search results to model answers.'
 )
+
+render_module_quiz("module_4")

@@ -2,6 +2,7 @@ import streamlit as st
 from ziko_st_toc import table_of_contents
 from ui_style import apply_style
 from auth_utils import require_login
+from quiz import render_module_quiz
 
 
 apply_style('Module 2 - Agents and Tools')
@@ -606,3 +607,5 @@ st.info(
     'the tools needed for the current task, and use ToolRuntime when a tool '
     'needs state, context, memory, streaming, or execution metadata.'
 )
+
+render_module_quiz("module_2")

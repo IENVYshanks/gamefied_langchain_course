@@ -19,12 +19,14 @@ and a Streamlit frontend that guides learners through key LangChain concepts.
 - Ollama model support via `ollama:<model>` identifiers
 - Example use of `langchain_core` prompt templates, runnables, and output parsers
 - RAG and embeddings examples in the frontend pages
+- Ten-question module quizzes with persistent points and achievement badges
 
 ## Prerequisites
 
 - Python 3.11+ recommended
 - [Ollama](https://ollama.com/) installed and running locally
 - A supported Ollama model available on your machine
+- MySQL 8+ running locally or on a reachable server
 
 ## Install
 
@@ -45,6 +47,20 @@ python -m pip install -r requirements.txt
 ```
 
 ## Run the demo
+
+Authentication and user progress are stored in MySQL. Set `MYSQL_HOST`,
+`MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, and `MYSQL_DATABASE` before
+starting Streamlit (see `.env.example`). On first run, the app creates the
+database plus the `users`, `user_progress`, and `quiz_attempts` tables, so the MySQL account must
+have database creation permission. Python does not load `.env` automatically.
+
+FastAPI owns all database access through SQLAlchemy and validates API payloads
+with Pydantic. Streamlit calls that API using `BACKEND_URL` (default
+`http://127.0.0.1:8000`) and does not connect to MySQL directly.
+
+Each correct quiz answer is worth 10 points. Only the best score for each
+module counts. Badge thresholds are Newbie (0–90), Bronze (100–240), Silver
+(250–390), and Gold (400–500).
 
 1. Start the Ollama server (if not already running):
 

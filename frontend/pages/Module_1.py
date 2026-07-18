@@ -2,6 +2,7 @@ import streamlit as st
 from ziko_st_toc import table_of_contents
 from ui_style import apply_style
 from auth_utils import require_login
+from quiz import render_module_quiz
 
 
 apply_style('Module 1 - Models, Prompts, and Chains')
@@ -675,3 +676,5 @@ st.write("""
 Chains are the core building blocks of LangChain applications and are used in
 chatbots, RAG systems, agents, workflows, automation pipelines, and multi-agent architectures.
 """)
+
+render_module_quiz("module_1")

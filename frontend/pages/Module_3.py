@@ -2,6 +2,7 @@ import streamlit as st
 from ziko_st_toc import table_of_contents
 from ui_style import apply_style
 from auth_utils import require_login
+from quiz import render_module_quiz
 
 
 apply_style('Module 3 - Memory')
@@ -531,3 +532,5 @@ st.info(
     'Key idea: checkpointers remember a thread; stores remember durable facts. '
     'Most real agents use both.'
 )
+
+render_module_quiz("module_3")

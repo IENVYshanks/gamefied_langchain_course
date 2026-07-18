@@ -1,64 +1,87 @@
-import os
+import secrets
 
 import streamlit as st
-import streamlit_authenticator as stauth
-import yaml
-from yaml.loader import SafeLoader
 
-# Resolve config.yaml next to this file so it works regardless of the
-# directory `streamlit run` was launched from.
-_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_PATH = os.path.join(_DIR, "config.yaml")
+from database import authenticate_user, create_user, find_username_by_email, reset_password
 
 
-def load_config():
-    with open(CONFIG_PATH) as file:
-        return yaml.load(file, Loader=SafeLoader)
+class DatabaseAuthenticator:
+    """Small Streamlit-compatible auth UI backed entirely by MySQL."""
+
+    def login(self, location="main"):
+        if location == "unrendered" or st.session_state.get("authentication_status"):
+            return
+        with st.form("login_form"):
+            username = st.text_input("Username")
+            password = st.text_input("Password", type="password")
+            submitted = st.form_submit_button("Login")
+        if submitted:
+            user = authenticate_user(username, password)
+            if not user:
+                st.session_state["authentication_status"] = False
+                return
+            st.session_state.update(
+                authentication_status=True, user_id=user["id"], username=user["username"],
+                name=user["name"], email=user["email"], role=user["role"],
+            )
+
+    def register_user(self, pre_authorized=None):
+        with st.form("register_form"):
+            name = st.text_input("Full name")
+            email = st.text_input("Email")
+            username = st.text_input("Choose a username")
+            password = st.text_input("Choose a password", type="password")
+            confirm = st.text_input("Confirm password", type="password")
+            submitted = st.form_submit_button("Register")
+        if not submitted:
+            return None, None, None
+        if password != confirm:
+            raise ValueError("Passwords do not match")
+        create_user(username, email, name, password)
+        return email, username, name
+
+    def forgot_password(self):
+        with st.form("password_reset_form"):
+            username = st.text_input("Username", key="reset_username")
+            email = st.text_input("Email", key="reset_email")
+            submitted = st.form_submit_button("Generate new password")
+        if not submitted:
+            return None, None, None
+        new_password = secrets.token_urlsafe(10)
+        if not reset_password(username, email, new_password):
+            return False, email, None
+        return username, email, new_password
+
+    def forgot_username(self):
+        with st.form("username_recovery_form"):
+            email = st.text_input("Email", key="recovery_email")
+            submitted = st.form_submit_button("Recover username")
+        if not submitted:
+            return None, None
+        return find_username_by_email(email) or False, email
+
+    def logout(self, label="Logout", location="sidebar"):
+        if st.button(label):
+            for key in ("authentication_status", "user_id", "username", "name", "email", "role"):
+                st.session_state.pop(key, None)
+            st.rerun()
 
 
 def save_config(config):
-    with open(CONFIG_PATH, "w") as file:
-        yaml.dump(config, file, default_flow_style=False, allow_unicode=True)
+    """Compatibility no-op: account changes are committed directly to MySQL."""
 
 
 def get_authenticator():
-    """
-    Build the Authenticate object once per session and reuse the same
-    instance on every page so the same cookie manager is shared app-wide.
-    """
     if "authenticator" not in st.session_state:
-        config = load_config()
-        st.session_state["config"] = config
-        st.session_state["authenticator"] = stauth.Authenticate(
-            config["credentials"],
-            config["cookie"]["name"],
-            config["cookie"]["key"],
-            config["cookie"]["expiry_days"],
-        )
-    return st.session_state["authenticator"], st.session_state["config"]
+        st.session_state["authenticator"] = DatabaseAuthenticator()
+    return st.session_state["authenticator"], {"pre-authorized": {"emails": []}}
 
 
 def restore_session():
-    """
-    Silently re-check the re-authentication cookie on every page load
-    (no widget rendered). This is what keeps a user logged in as they
-    click between Module pages.
-    """
-    authenticator, config = get_authenticator()
-    try:
-        authenticator.login(location="unrendered")
-    except Exception:
-        pass
-    return authenticator, config
+    return get_authenticator()
 
 
 def require_login():
-    """
-    Call at the top of every protected page, right after apply_style().
-    Halts the page with a friendly message if the user isn't logged in,
-    since Streamlit's legacy pages/ sidebar always lists every page
-    regardless of auth state.
-    """
     authenticator, config = restore_session()
     if not st.session_state.get("authentication_status"):
         st.warning("Please log in from the Home page to view this module.")

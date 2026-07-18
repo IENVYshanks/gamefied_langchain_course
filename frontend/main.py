@@ -1,6 +1,8 @@
 import streamlit as st
 from ui_style import apply_style, hero, module_card
 from auth_utils import restore_session, save_config
+from database import get_gamification, initialize_database
+from quiz import badge_for
 
 
 def render_login_gate(authenticator, config):
@@ -150,11 +152,20 @@ def render_course_home():
 
 def main():
     apply_style("Gamified LangChain Learning")
+    try:
+        initialize_database()
+    except Exception as exc:
+        st.error("Could not reach the backend API. Start FastAPI and check BACKEND_URL.")
+        st.exception(exc)
+        st.stop()
     authenticator, config = restore_session()
 
     if st.session_state.get("authentication_status"):
         with st.sidebar:
             st.write(f'Logged in as **{st.session_state.get("name")}**')
+            stats = get_gamification(st.session_state["user_id"])
+            st.metric("Quiz points", stats["points"])
+            st.write(f'Badge: **{badge_for(stats["points"])}**')
             authenticator.logout("Logout", "sidebar")
         render_course_home()
     else:
@@ -163,4 +174,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
